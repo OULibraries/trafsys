@@ -1,0 +1,11 @@
+name = Trafsys
+description = integration of Trafsys stats through the api
+
+core = 7.x
+package = Drupal 7 Development
+
+files[] = trafsys.module
+files[] = trafsys.views.inc
+files[] = handlers/trafsys_handler_field.inc
+files[] = plugins/trafsys_plugin_query.inc
+;files[] = handlers/trafsys_field_option.inc
