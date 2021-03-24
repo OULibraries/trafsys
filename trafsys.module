@@ -1,0 +1,103 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Tim Smith
+ * Date: 11/16/20
+ * Time: 10:05 AM
+ */
+
+
+/**
+ * Implements hook_views_api().
+ */
+function trafsys_views_api() {
+    return array(
+        'api' => 3.0
+    );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function trafsys_menu() {
+    /* proxy settings */
+    $items['admin/config/system/trafsys']
+        = array(
+        'title' => 'Trafsys traffic counting settings',
+        'description' => 'Configure settings for Trafsys reports',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('trafsys_settings'),
+        'access arguments' => array('administer trafsys settings'),
+        'weight' => -10,
+    );
+    return $items;
+}
+
+// set the permissions for this module
+function trafsys_permission() {
+    $modperms = array(
+        'administer trafsys settings' => array(
+            'title' => t('Administer Trafsys reports'),
+        ),
+    );
+    return $modperms;
+}
+
+// Settings for Trafsys: UN and Psswd
+function trafsys_settings() {
+    $form = array();
+    $form['trafsys_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Trafsys Username'),
+        '#default_value' => variable_get('trafsys_name', ""),
+        '#attributes' => array('placeholder' => t('Probably an email address')),
+        '#description' => t("Email/Username for the Trafsys API"),
+        '#required' => TRUE,
+    );
+    $form['trafsys_pw'] = array(
+        '#type' => 'password',
+        '#title' => t('Trafsys PW'),
+        '#default_value' => variable_get('trafsys_pw', ""),
+        '#attributes' => array('placeholder' => t('**********')),
+        '#description' => t("Password for the Trafsys API"),
+        '#required' => TRUE,
+    );
+
+    return system_settings_form($form);
+}
+
+// todo something in here throws an error I think
+function trafsys_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_state['view']->base_table == "trafsys" && $form_state['id'] == 'periodending') {
+    trafsys_alter_date_filters($form);
+  }
+  if ($form_state['view']->base_table == "trafsys" && $form_state['id'] == 'location') {
+    $form['options']['value']['#title'] = "Location: If more than one, separate them with a comma.";
+    $form['options']['operator']['#title'] = "Operator: (You only get one choice...sorry.)";
+    trafsys_alter_location_filters($form);
+  }
+}
+// remove these options...they're not worth the hassle
+function trafsys_alter_date_filters(&$form) {
+  unset($form['options']['operator']['#options']['not between']);
+  unset($form['options']['operator']['#options']['regular_expression']);
+  unset($form['options']['operator']['#options']['!=']);
+  unset($form['options']['operator']['#options']['>=']);
+  unset($form['options']['operator']['#options']['<=']);
+  $form['options']['value']['type']['#options']['date'] = 'A date in CCYY-MM-DD format. If "Is Between" is selected, the range can not be over 365 days.';
+}
+// remove these options...they're not worth the hassle either
+function trafsys_alter_location_filters(&$form) {
+  unset($form['options']['operator']['#options']['!=']);
+  unset($form['options']['operator']['#options']['contains']);
+  unset($form['options']['operator']['#options']['word']);
+  unset($form['options']['operator']['#options']['allwords']);
+  unset($form['options']['operator']['#options']['starts']);
+  unset($form['options']['operator']['#options']['not_starts']);
+  unset($form['options']['operator']['#options']['ends']);
+  unset($form['options']['operator']['#options']['not_ends']);
+  unset($form['options']['operator']['#options']['not']);
+  unset($form['options']['operator']['#options']['shorterthan']);
+  unset($form['options']['operator']['#options']['longerthan']);
+  unset($form['options']['operator']['#options']['regular_expression']);
+}

@@ -4,8 +4,14 @@ description = integration of Trafsys stats through the api
 core = 7.x
 package = Drupal 7 Development
 
+dependencies[] = charts
+
 files[] = trafsys.module
 files[] = trafsys.views.inc
 files[] = handlers/trafsys_handler_field.inc
 files[] = plugins/trafsys_plugin_query.inc
-;files[] = handlers/trafsys_field_option.inc
+files[] = handlers/trafsys_views_plugin_display_extender.inc
+files[] = handlers/trafsys_handler_filter_string.inc
+files[] = handlers/trafsys_handler_filter_bool.inc
+files[] = handlers/trafsys_handler_filter_date.inc
+files[] = date_input.php
