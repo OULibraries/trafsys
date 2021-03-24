@@ -15,3 +15,4 @@ class trafsys_handler_field extends views_handler_field {
         $this->field_alias = $this->real_field;
     }
 }
+
