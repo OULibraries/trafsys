@@ -55,27 +55,41 @@ class trafsys_plugin_query extends views_plugin_query {
     }
 
     // Get the Trafsys Token
-    try {
-      $trafsysTokenData = $this->GetToken($trafsysEmail, $trafsysPassword);
-      if ($trafsysTokenData->code != 200) {
-        throw new Exception("Message: " . $trafsysTokenData->data);
+    $num_of_attempts = 5;
+    $attempts = 0;
+
+    do {
+      try {
+        $trafsysTokenData = $this->GetToken($trafsysEmail, $trafsysPassword);
+        if ($trafsysTokenData->code != 200) {
+          throw new Exception("Message: " . $trafsysTokenData->data);
+        }
+
+        $trafsysJson = json_decode($trafsysTokenData->data, TRUE);
+        $data_array['trafsys_access_token'] = $trafsysJson['access_token'];
+        $trafsysTrafficData = $this->getTrafficData($data_array);
+
+        if ($trafsysTrafficData->code != 200) {
+          throw new Exception("Message: " . $trafsysTrafficData->data);
+        }
+
+        $trafsysReturnedJson = json_decode($trafsysTrafficData->data);
+        $this->processData($trafsysReturnedJson, $data_array, $view);
+
+      } catch (Exception $e) {
+//        drupal_set_message($e->getMessage()); uncomment this to debug
+        error_log($e->getMessage());
+        if (strpos($e->getMessage(), 'API calls quota exceeded') !== FALSE) {
+          $attempts ++;
+          sleep(1);
+          continue;
+        }
+        else {
+          $attempts = 5;
+        }
       }
-
-      $trafsysJson = json_decode($trafsysTokenData->data, TRUE);
-      $data_array['trafsys_access_token'] = $trafsysJson['access_token'];
-      $trafsysTrafficData = $this->getTrafficData($data_array);
-
-      if($trafsysTrafficData->code != 200) {
-        throw new Exception("Message: " . $trafsysTrafficData->data);
-      }
-
-      $trafsysReturnedJson = json_decode($trafsysTrafficData->data);
-      $this->processData($trafsysReturnedJson, $data_array,$view);
-
-    } catch (Exception $e) {
-      drupal_set_message($e->getMessage());
-      error_log($e->getMessage());
-    }
+      $attempts = 5;
+    } while($attempts < $num_of_attempts);
   }
 
   // Hit the Trafsys API the first time to get the Token
