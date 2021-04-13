@@ -100,6 +100,13 @@ function trafsys_views_data() {
       'handler' => 'trafsys_handler_field',
     ],
   ];
+  $data['trafsys']['total'] = [
+    'title' => t('Total'),
+    'help' => t('An integer that sums up all the ins for the data selected.'),
+    'field' => [
+      'handler' => 'trafsys_handler_field',
+    ],
+  ];
 
   return $data;
 }

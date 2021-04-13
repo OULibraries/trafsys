@@ -9,6 +9,9 @@
 class trafsys_plugin_query extends views_plugin_query {
 
   function execute(&$view) {
+
+    if (!is_object($view)) { return; }
+
     //setting server variable
     $trafsysEmail = variable_get('trafsys_name', "");
     $trafsysPassword = variable_get('trafsys_pw', "");
@@ -41,6 +44,8 @@ class trafsys_plugin_query extends views_plugin_query {
       $data_array['location'] = '';
     }
 
+//    if (!array_key_exists('isinternal', $view->display_handler->handlers['filter'])) { return; }
+//    if (!is_object($view->display_handler->handlers['filter']['isinternal'])) { return; }
     // Some sensors are not exterior doors...they are internal
     if ($view->display_handler->handlers['filter']['isinternal']->value == 0) {
       $data_array['show_interior'] = 'false';
@@ -139,6 +144,7 @@ class trafsys_plugin_query extends views_plugin_query {
 
   // loop through the data and assign it to fields in the View
   function processData($data, $data_array, $view) {
+    $total = 0;
     foreach ($data as $d) {
       if (($data_array['show_interior'] == 'false') && ($d->IsInternal == 'TRUE')) { continue; } // do I need this if it's included in the params?
       // this little diddy compares (in lowercase) the returned "location" to the array of filter "locations"
@@ -149,8 +155,10 @@ class trafsys_plugin_query extends views_plugin_query {
       $row->isinternal = $d->IsInternal;
       $row->periodending = $d->PeriodEnding;
       $row->ins = $d->Ins;
+      $total = $total + $d->Ins;
       $row->outs = $d->Outs;
       $view->result[] = $row;
     }
+    $view->result[]->total = $total;
   }
 }

@@ -68,6 +68,8 @@ function trafsys_settings() {
 
 // todo something in here throws an error I think
 function trafsys_form_alter(&$form, &$form_state, $form_id) {
+  if (!array_key_exists('view', $form_state)) { return; }
+  if (!is_object($form_state['view'])) { return; }
   if ($form_state['view']->base_table == "trafsys" && $form_state['id'] == 'periodending') {
     trafsys_alter_date_filters($form);
   }
