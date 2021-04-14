@@ -155,10 +155,12 @@ class trafsys_plugin_query extends views_plugin_query {
       $row->isinternal = $d->IsInternal;
       $row->periodending = $d->PeriodEnding;
       $row->ins = $d->Ins;
-      $total = $total + $d->Ins;
       $row->outs = $d->Outs;
+      $total = $total + $d->Ins;
+      if ($d === end($data)) {
+        $row->total = $total;
+      }
       $view->result[] = $row;
     }
-    $view->result[]->total = $total;
   }
 }
